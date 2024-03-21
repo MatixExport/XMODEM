@@ -2,7 +2,6 @@ import signals
 from Binary import Binary
 from byte_operations import int_to_bit_string
 from crc import calculate_xmodem_crc
-from signals import *
 
 
 # nie podoba mi się ten crc_mode i te
