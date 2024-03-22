@@ -1,14 +1,10 @@
 import signals
 from Binary import Binary
 from byte_operations import int_to_bit_string
-from crc import calculate_xmodem_crc
+from src.ErrorCheckers.CrcChecker import CrcChecker
+from src.ErrorCheckers.ChecksumChecker import ChecksumChecker
 
 
-# nie podoba mi się ten crc_mode i te
-# ify z tego wynikające
-# jeszcze nie wiem jak to rozdzielę
-# ale tak nie zostanie
-# może rozdzielę to na 2 klasy
 class Packet:
 
     def __init__(self, _blk):
@@ -16,7 +12,7 @@ class Packet:
         self.blk = _blk
         self.blk_check = None
         self.checksum = Binary()
-        self.crc_mode = False
+        self.error_checker = ChecksumChecker()
 
     def add_byte(self, byte):
         if len(self.content) < 128:
@@ -27,20 +23,10 @@ class Packet:
         return False
 
     def set_crc_mode(self, is_crc):
-        self.crc_mode = is_crc
-
-    def calculate_checksum(self):
-        msg_sum = 0
-        for msg in self.content:
-            msg_sum += msg.get_int()
-        msg_sum = msg_sum % 256
-        self.checksum.set_bytes(msg_sum.to_bytes(1, "big"))
-        return self.checksum
-
-    def calculate_crc(self):
-        crc = calculate_xmodem_crc(self.content)
-        self.checksum.set_bytes(crc.to_bytes(2, "big"))
-        return self.checksum
+        if is_crc:
+            self.error_checker = CrcChecker()
+            return
+        self.error_checker = ChecksumChecker()
 
     def set_content(self, byte_arr):
         for byte in byte_arr:
@@ -57,15 +43,8 @@ class Packet:
                 msg.get_bytes()
             )
 
-        if self.crc_mode:
-            self.calculate_crc()
-            byte_arr.insert(0, signals.CRC_MODE.to_bytes(1, 'big'))
-
-        else:
-            self.calculate_checksum()
-            byte_arr.insert(0, signals.SOH.to_bytes(1, 'big'))
-
-        byte_arr.append(self.checksum.get_bytes())
+        byte_arr.insert(0, self.error_checker.get_header().to_bytes(1, 'big'))
+        byte_arr.append(self.error_checker.get_error_detecting_code(self.content).get_bytes())
         return byte_arr
 
     def from_bytes(self, data):
@@ -77,29 +56,15 @@ class Packet:
             msg.set_bytes(data[i])
             self.content.append(msg)
 
-        _checksum = Binary()
-        if int.from_bytes(data[0], byteorder='big') == signals.CRC_MODE:
-            self.crc_mode = True
-
-        _checksum.set_bytes(data[-1])
-        self.checksum = _checksum
+        self.set_crc_mode(int.from_bytes(data[0], byteorder='big') == signals.CRC_MODE)
+        self.checksum.set_bytes(data[-1])
         return self
-
-    def _is_crc_valid(self):
-        return self.checksum.value == self.calculate_crc().value
-
-    def _is_checksum_valid(self):
-        return self.checksum.value == self.calculate_checksum().value
 
     def is_valid(self):
         if self.blk + self.blk_check != 255:
             return False
-        if self.crc_mode:
-            if not self._is_crc_valid():
-                return False
-        else:
-            if not self._is_checksum_valid():
-                return False
+        if not self.error_checker.validate_error_detecting_code(self.content, self.checksum):
+            return False
         return True
 
     def __str__(self):
