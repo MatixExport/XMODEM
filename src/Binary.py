@@ -25,6 +25,10 @@ class Binary:
         self.number_of_bits = len(bytes) * 8 - 1
         self.value = int.from_bytes(bytes, 'big')
 
+    def set_value(self, value):
+        self.value = value
+        self.number_of_bits = 8
+
     def get_bytes(self):
         return self.value.to_bytes(ceil(self.number_of_bits / 8), 'big')
 
@@ -34,7 +38,7 @@ class Binary:
         for i in range(num_of_bytes):
             print(i)
             byte_arr.append(
-                ((self.value >> i*8) & 0x00FF).to_bytes(1,'big')
+                ((self.value >> i * 8) & 0x00FF).to_bytes(1, 'big')
             )
         return byte_arr
 

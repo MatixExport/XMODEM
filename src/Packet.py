@@ -47,18 +47,21 @@ class Packet:
         byte_arr.append(self.error_checker.get_error_detecting_code(self.content).get_bytes())
         return byte_arr
 
-    def from_bytes(self, data):
-        self.blk = int.from_bytes(data[1], 'big')
-        self.blk_check = int.from_bytes(data[2], 'big')
+    @staticmethod
+    def from_bytes(data):
+        packet = Packet(int.from_bytes(data[1], 'big'))
+        packet.blk_check = int.from_bytes(data[2], 'big')
 
         for i in range(3, 131):
             msg = Binary()
             msg.set_bytes(data[i])
-            self.content.append(msg)
+            packet.content.append(msg)
 
-        self.set_crc_mode(int.from_bytes(data[0], byteorder='big') == signals.CRC_MODE)
-        self.checksum.set_bytes(data[-1])
-        return self
+        packet.set_crc_mode(int.from_bytes(data[0], byteorder='big') == signals.CRC_MODE)
+
+        #crc się rozdzieli po transmisji więc to trzeba zmienić
+        packet.checksum.set_bytes(data[-1])
+        return packet
 
     def is_valid(self):
         if self.blk + self.blk_check != 255:
