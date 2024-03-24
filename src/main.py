@@ -1,6 +1,6 @@
-# from Packet import Packet
+from Packet import Packet
 from byte_operations import read_file,byte_string_to_binary_arr,package_filedata
-# import serial
+import serial
 #
 # data = [i.to_bytes(1,'big') for i in range(128)]
 # pack = Packet(1)
@@ -21,13 +21,16 @@ from byte_operations import read_file,byte_string_to_binary_arr,package_filedata
 # for msg in pack2.content:
 #     print(msg.value)
 
-packets = read_file("halo.txt")
-packets = [byte_string_to_binary_arr(packet) for packet in packets]
-packets = package_filedata(packets)
+# packets = read_file("halo.txt")
+# packets = [byte_string_to_binary_arr(packet) for packet in packets]
+# packets = package_filedata(packets)
+#
+# for packet in packets:
+#     for binary in packet:
+#         print(binary.get_bytes())
 
-for packet in packets:
-    for binary in packet:
-        print(binary.get_bytes())
+
+
 
 
 
