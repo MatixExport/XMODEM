@@ -1,7 +1,7 @@
 import time
 from signals import *
 from Packet import Packet
-from byte_operations import byte_arr_to_byte_string
+from byte_operations import bytes_to_byte_string,byte_string_to_bytes
 import serial
 
 
@@ -47,7 +47,7 @@ def start_read_file(port):
                 continue
             print("Reading a Packet")
             read_msg = port.read(port.in_waiting)
-            pack = Packet.from_bytes(read_msg)
+            pack = Packet.from_bytes(byte_string_to_bytes(read_msg))
             if pack.is_valid():
                 packages.append(pack)
                 port.write(signal_to_byte(ACK))
@@ -73,7 +73,7 @@ def wait_for_signal(port, timeout=60):
 
 
 def send_packet(port, packet):
-    port.write(byte_arr_to_byte_string(packet.get_bytes()))
+    port.write(bytes_to_byte_string(packet.get_bytes()))
     if wait_for_signal(port) == signal_to_byte(NAK):
         print("Invalid Packet was received, resending last Packet")
         send_packet(port, packet)

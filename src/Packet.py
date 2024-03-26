@@ -1,6 +1,5 @@
 import signals
 from Binary import Binary
-from byte_operations import int_to_bit_string,byte_string_to_bytes
 from CrcChecker import CrcChecker
 from ChecksumChecker import ChecksumChecker
 
@@ -58,7 +57,6 @@ class Packet:
 
     @staticmethod
     def from_bytes(data):
-        data = byte_string_to_bytes(data)
         packet = Packet(int.from_bytes(data[1], 'big'))
         packet.blk_check = int.from_bytes(data[2], 'big')
 
@@ -77,9 +75,4 @@ class Packet:
             return False
         return True
 
-    def __str__(self):
-        output = ""
-        for msg in self.content:
-            output += msg.get_string()
-        output += int_to_bit_string(self.blk) + int_to_bit_string(255 - self.blk)
-        return output
+

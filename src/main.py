@@ -1,6 +1,6 @@
 from connection import *
 from byte_operations import *
-from byte_operations import read_file, byte_string_to_binary_arr, package_filedata
+from byte_operations import read_file, byte_string_to_binary_arr, add_padding,pack
 from connection import xmodem_transmit_file, xmodem_read_file
 from Packet import Packet
 import argparse
@@ -17,22 +17,15 @@ if __name__ == '__main__':
 
     com_port_name = "COM" + str(args.COM_port_number)
     if args.transmit:
-        packets = read_file(args.file)
-        packets = [byte_string_to_binary_arr(packet) for packet in packets]
-        packets = package_filedata(packets)
-        for i in range(len(packets)):
-            pak = Packet(i)
-            pak.set_binary_content(packets[i])
-            packets[i] = pak
+        filedata = read_file(args.file)
+        filedata = [byte_string_to_binary_arr(block) for block in filedata]
+        packets = add_padding(filedata)
+        packets = pack(packets)
         xmodem_transmit_file(com_port_name, packets)
     else:
         packets = xmodem_read_file(com_port_name, args.crc)
-        byte_arr = []
-        for packet in packets:
-            byte_arr.extend(packet.get_byte_content())
-        filedata = byte_arr_to_byte_string(byte_arr)
-        filedata = unpackage_filedata(filedata)
-        file = open(args.file, 'bw')
-        file.write(filedata)
-        file.close()
+        filedata = unpack(packets)
+        filedata = remove_padding(filedata)
+        filedata = [binary_arr_to_byte_string(binary_arr) for binary_arr in filedata]
+        write_file(args.file, filedata)
 
