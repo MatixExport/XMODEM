@@ -12,3 +12,6 @@ class ErrorChecker:
 
     def validate_error_detecting_code(self, msg_arr, old_code):
         return old_code.value == self.get_error_detecting_code(msg_arr).value
+
+    def read_checksum(self, msg_arr):
+        return msg_arr[-1]

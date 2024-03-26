@@ -1,6 +1,6 @@
-from src.ErrorCheckers.ErrorChecker import ErrorChecker
-from src.Binary import Binary
-from src.signals import *
+from ErrorChecker import  ErrorChecker
+from Binary import Binary
+from signals import *
 
 
 class ChecksumChecker(ErrorChecker):

@@ -1,33 +1,25 @@
-from Packet import Packet
-from byte_operations import read_file,byte_string_to_binary_arr,package_filedata
-import serial
-#
-# data = [i.to_bytes(1,'big') for i in range(128)]
-# pack = Packet(1)
-# pack.set_crc_mode(True)
-# pack.set_content(data)
-# # print(pack.calculate_crc().value)
-# # for msg in pack.content:
-# #     print(msg.value)
-#
-#
-# pack2 = Packet(1)
-#
-#
-# pack2 = Packet.from_bytes(pack2.get_bytes())
-# # print(pack2.calculate_crc().value)
-# print(pack2.is_valid())
+from connection import *
+from byte_operations import *
 
-# for msg in pack2.content:
-#     print(msg.value)
+packages = xmodem_read_file("COM3",True)
 
-# packets = read_file("halo.txt")
-# packets = [byte_string_to_binary_arr(packet) for packet in packets]
-# packets = package_filedata(packets)
-#
-# for packet in packets:
-#     for binary in packet:
-#         print(binary.get_bytes())
+
+file = open("halo2",'bw')
+
+byte_arr = []
+for packet in packages:
+    byte_arr.extend(packet.get_byte_content())
+final = byte_arr_to_byte_string(byte_arr)
+final = unpackage_filedata(final)
+file.write(final)
+file.close()
+
+
+
+
+
+
+
 
 
 

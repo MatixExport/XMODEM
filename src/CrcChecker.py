@@ -1,7 +1,7 @@
-from src.ErrorCheckers.ErrorChecker import ErrorChecker
-from src.crc import calculate_xmodem_crc
-from src.Binary import Binary
-from src.signals import *
+from crc import calculate_xmodem_crc
+from ErrorChecker import ErrorChecker
+from Binary import Binary
+from signals import *
 
 
 class CrcChecker(ErrorChecker):
@@ -18,4 +18,6 @@ class CrcChecker(ErrorChecker):
         new_crc.set_bytes(crc.to_bytes(2, "big"))
         return new_crc
 
+    def read_checksum(self, msg_arr):
+        return bytearray([int.from_bytes(msg_arr[-1]), int.from_bytes(msg_arr[-2])])
 

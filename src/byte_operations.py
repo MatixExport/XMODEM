@@ -4,7 +4,6 @@ from Binary import Binary
 def int_to_bit_string(int):
     return "{0:b}".format(int)
 
-
 def byte_string_to_binary_arr(byte_string):
     binary_arr = []
     for byte in byte_string:
@@ -12,6 +11,15 @@ def byte_string_to_binary_arr(byte_string):
         binary.set_value(byte)
         binary_arr.append(binary)
     return binary_arr
+
+def byte_string_to_bytes(byte_string):
+    return [byte.to_bytes(1,"big") for byte in byte_string]
+
+def byte_arr_to_byte_string(bytes):
+    byar = bytearray()
+    for byte in bytes:
+        byar.append(int.from_bytes(byte))
+    return byar
 
 
 
@@ -42,4 +50,7 @@ def package_filedata(data):
 
     return data
 
-
+def unpackage_filedata(data):
+    padding = data[-1]
+    data = data[:len(data) - padding]
+    return data
