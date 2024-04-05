@@ -83,7 +83,7 @@ def remove_padding(data):
 def pack(data_arr):
     packets = []
     for i in range(len(data_arr)):
-        pak = Packet(i)
+        pak = Packet(i+1)
         pak.set_binary_content(data_arr[i])
         packets.append(pak)
     return packets
