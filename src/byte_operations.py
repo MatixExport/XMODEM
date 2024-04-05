@@ -55,7 +55,19 @@ def write_file(filename, data_arr):
         print(e)
 
 
-def add_padding(data):
+def add_padding(data, use_pcks=True):
+    if use_pcks:
+        return add_pcks_padding(data)
+    return add_terra_padding(data, 0x1a)
+
+
+def remove_padding(data, use_pcks=True):
+    if use_pcks:
+        return remove_pcks_padding(data)
+    return remove_terra_padding(data, 0x1a)
+
+
+def add_pcks_padding(data):
     index = len(data) - 1
     padding = 128 - len(data[index])
 
@@ -72,7 +84,7 @@ def add_padding(data):
     return data
 
 
-def remove_padding(data):
+def remove_pcks_padding(data):
     padding = data[-1][-1].value
     if padding == 128:
         return data[:-1]
@@ -80,10 +92,30 @@ def remove_padding(data):
     return data
 
 
+def add_terra_padding(data, pad):
+    to_add = 128 - len(data[-1])
+    for i in range(to_add):
+        binary = Binary()
+        binary.set_value(pad)
+        data[-1].append(binary)
+    return data
+
+
+def remove_terra_padding(data, pad):
+    to_del = 0
+    for element in reversed(data[-1]):
+        if element == pad:
+            to_del += 1
+            continue
+        break
+    data[-1] = data[-1][:len(data[-1]) - to_del]
+    return data
+
+
 def pack(data_arr):
     packets = []
     for i in range(len(data_arr)):
-        pak = Packet(i+1)
+        pak = Packet(i + 1)
         pak.set_binary_content(data_arr[i])
         packets.append(pak)
     return packets
