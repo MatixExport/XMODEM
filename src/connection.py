@@ -1,7 +1,7 @@
 import time
 from signals import *
 from Packet import Packet
-from byte_operations import bytes_to_byte_string,byte_string_to_bytes
+from byte_operations import bytes_to_byte_string, byte_string_to_bytes
 import serial
 
 
@@ -70,13 +70,33 @@ def wait_for_signal(port, timeout=60):
     while time.time() - init_time <= timeout:
         if port.in_waiting:
             return port.read(1)
+    return None
+
+
+def send_EOT(port, tries=2):
+    while tries > 0:
+        port.write(signal_to_byte(EOT))
+        print("Sending EOT")
+        signal = wait_for_signal(port, 10)
+        if signal == signal_to_byte(ACK):
+            print("Received ACK to EOT")
+            return True
+        tries -= 1
+        print("ACK not received, resending EOT")
+    print("Retries limit for EOT reached, ending transmission without ACK")
+    return False
 
 
 def send_packet(port, packet):
     port.write(bytes_to_byte_string(packet.get_bytes()))
-    if wait_for_signal(port) == signal_to_byte(NAK):
+    signal = wait_for_signal(port)
+    if signal == signal_to_byte(NAK):
         print("Invalid Packet was received, resending last Packet")
-        send_packet(port, packet)
+        return send_packet(port, packet)
+    if signal == signal_to_byte(CAN):
+        print("CAN received, ending connection")
+        return False
+    return True
 
 
 def xmodem_transmit_file(port_name, packets):
@@ -102,7 +122,8 @@ def xmodem_transmit_file(port_name, packets):
             print("Transmitter is sending packet", i)
             if crc_mode:
                 packets[i].set_crc_mode(True)
-            send_packet(serial_port, packets[i])
+            if not send_packet(serial_port, packets[i]):
+                exit(0)
             i += 1
-        print("Ending Connection, Sending EOT")
-        serial_port.write(signal_to_byte(EOT))
+        print("Ending Connection")
+        send_EOT(serial_port)
