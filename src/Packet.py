@@ -41,7 +41,6 @@ class Packet:
     def get_binary_content(self):
         return self.content
 
-
     def get_bytes(self):
         byte_arr = [self.blk.to_bytes(1, "big"), (255 - self.blk).to_bytes(1, "big")]
 
@@ -51,9 +50,9 @@ class Packet:
             )
 
         byte_arr.insert(0, self.error_checker.get_header().to_bytes(1, 'big'))
-        byte_arr.extend(self.error_checker.get_error_detecting_code(self.content).get_bytes_as_array())
+        byte_arr.extend(reversed(self.error_checker.get_error_detecting_code(self.content).get_bytes_as_array()))
+        # print("Just After extension",byte_arr)
         return byte_arr
-
 
     @staticmethod
     def from_bytes(data):
@@ -74,5 +73,3 @@ class Packet:
         if not self.error_checker.validate_error_detecting_code(self.content, self.checksum):
             return False
         return True
-
-

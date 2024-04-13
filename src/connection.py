@@ -52,6 +52,7 @@ def start_read_file(port):
                 packages.append(pack)
                 port.write(signal_to_byte(ACK))
             else:
+                print("Packet is invalid, sending NAK")
                 port.write(signal_to_byte(NAK))
     return packages
 
@@ -88,6 +89,8 @@ def send_EOT(port, tries=2):
 
 
 def send_packet(port, packet):
+    print(len(bytes_to_byte_string(packet.get_bytes())))
+    print(bytes_to_byte_string(packet.get_bytes()))
     port.write(bytes_to_byte_string(packet.get_bytes()))
     signal = wait_for_signal(port)
     if signal == signal_to_byte(NAK):

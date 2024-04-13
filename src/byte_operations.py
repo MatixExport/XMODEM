@@ -104,7 +104,7 @@ def add_terra_padding(data, pad):
 def remove_terra_padding(data, pad):
     to_del = 0
     for element in reversed(data[-1]):
-        if element == pad:
+        if element.get_int() == pad:
             to_del += 1
             continue
         break
