@@ -63,7 +63,8 @@ class Packet:
             msg = Binary()
             msg.set_bytes(data[i])
             packet.content.append(msg)
-        packet.set_crc_mode(data[0] == signals.CRC_MODE.to_bytes(1, 'big'))
+
+        # packet.set_crc_mode(data[0] == signals.CRC_MODE.to_bytes(1, 'big'))
         packet.checksum.set_bytes(packet.error_checker.read_checksum(data))
         return packet
 
