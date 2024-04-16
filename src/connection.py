@@ -27,7 +27,7 @@ def initialize_read_connection(port, crc_mode):
 
     while time.time() - init_time <= 60:
         if time.time() - last_request_time >= 10:
-            print("Sending NAK or C to transmitter")
+            print("Sending" + (" C " if crc_mode else " NAK ") + "to transmitter")
             port.write(signal_to_byte(signal_to_send))
             last_request_time = time.time()
         if port.in_waiting:
@@ -54,6 +54,8 @@ def start_read_file(port):
             else:
                 print("Packet is invalid, sending NAK")
                 port.write(signal_to_byte(NAK))
+    print("ACK TO EOT")
+    port.write(signal_to_byte(ACK))
     return packages
 
 
