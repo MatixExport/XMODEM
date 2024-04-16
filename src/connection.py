@@ -36,7 +36,7 @@ def initialize_read_connection(port, crc_mode):
     return False
 
 
-def start_read_file(port):
+def start_read_file(port,crc_mode):
     packages = []
     read_msg = None
     while read_msg != signal_to_byte(EOT):
@@ -47,7 +47,7 @@ def start_read_file(port):
                 continue
             print("Reading a Packet")
             read_msg = port.read(port.in_waiting)
-            pack = Packet.from_bytes(byte_string_to_bytes(read_msg))
+            pack = Packet.from_bytes(byte_string_to_bytes(read_msg),crc_mode)
             if pack.is_valid():
                 packages.append(pack)
                 port.write(signal_to_byte(ACK))
@@ -63,7 +63,7 @@ def xmodem_read_file(port_name, crc_mode=False):
     serial_port = initialize_port(port_name)
     serial_port.open()
     initialize_read_connection(serial_port, crc_mode)
-    packages = start_read_file(serial_port)
+    packages = start_read_file(serial_port,crc_mode)
     serial_port.close()
     return packages
 
@@ -105,7 +105,6 @@ def send_packet(port, packet):
 def xmodem_transmit_file(port_name, packets):
     serial_port = initialize_port(port_name)
     serial_port.open()
-    crc_mode = False
     while True:
         print("Transmitter is waiting for connection")
         signal = wait_for_signal(serial_port)
@@ -125,6 +124,7 @@ def xmodem_transmit_file(port_name, packets):
             print("Transmitter is sending packet", i)
             if crc_mode:
                 packets[i].set_crc_mode(True)
+
             if not send_packet(serial_port, packets[i]):
                 exit(0)
             i += 1
