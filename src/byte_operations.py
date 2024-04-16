@@ -115,7 +115,8 @@ def remove_terra_padding(data, pad):
 def pack(data_arr):
     packets = []
     for i in range(len(data_arr)):
-        pak = Packet(i + 1)
+        number = (i+1) % 256
+        pak = Packet(number)
         pak.set_binary_content(data_arr[i])
         packets.append(pak)
     return packets

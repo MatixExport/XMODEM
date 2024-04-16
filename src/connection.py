@@ -89,8 +89,6 @@ def send_EOT(port, tries=2):
 
 
 def send_packet(port, packet):
-    print(len(bytes_to_byte_string(packet.get_bytes())))
-    print(bytes_to_byte_string(packet.get_bytes()))
     port.write(bytes_to_byte_string(packet.get_bytes()))
     signal = wait_for_signal(port)
     if signal == signal_to_byte(NAK):
@@ -128,5 +126,5 @@ def xmodem_transmit_file(port_name, packets):
             if not send_packet(serial_port, packets[i]):
                 exit(0)
             i += 1
-        print("Ending Connection")
         send_EOT(serial_port)
+        print("Ending Connection")
